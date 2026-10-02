@@ -1,0 +1,457 @@
+/* ===========================
+   Green-AI Login Page
+=========================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins',sans-serif;
+}
+
+body{
+    background:#f4f7f6;
+    overflow:hidden;
+}
+
+.container{
+    display:flex;
+    width:100%;
+    height:100vh;
+}
+
+/* ===========================
+   LEFT PANEL
+=========================== */
+
+.left{
+    width:50%;
+    background:url("../image/solar-bg.png") center center/cover no-repeat;
+    position:relative;
+}
+
+.left::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:rgba(255,255,255,.45);
+}
+
+.overlay{
+    position:relative;
+    z-index:2;
+
+    height:100%;
+
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+
+    text-align:center;
+
+    padding:50px;
+}
+
+.logo{
+    width:170px;
+    margin-bottom:20px;
+}
+
+.overlay h1{
+
+    font-size:60px;
+    color:#0d8c42;
+    font-weight:700;
+    letter-spacing:2px;
+
+}
+
+.overlay p{
+
+    margin-top:15px;
+
+    font-size:20px;
+
+    color:#333;
+
+    max-width:420px;
+
+    line-height:1.7;
+
+}
+
+/* Feature Cards */
+
+.features{
+
+    margin-top:60px;
+
+    display:flex;
+
+    gap:30px;
+
+}
+
+.card{
+
+    width:120px;
+
+    padding:20px;
+
+    background:rgba(255,255,255,.75);
+
+    backdrop-filter:blur(12px);
+
+    border-radius:18px;
+
+    box-shadow:0 10px 25px rgba(0,0,0,.12);
+
+    transition:.3s;
+
+}
+
+.card:hover{
+
+    transform:translateY(-8px);
+
+}
+
+.card i{
+
+    font-size:32px;
+
+    color:#17914a;
+
+    margin-bottom:12px;
+
+}
+
+.card h4{
+
+    font-size:18px;
+
+    color:#222;
+
+}
+
+.card p{
+
+    margin-top:8px;
+
+    font-size:13px;
+
+    color:#555;
+
+}
+
+/* ===========================
+   RIGHT PANEL
+=========================== */
+
+.right{
+
+    width:50%;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    background:#fff;
+
+}
+
+.login-box{
+
+    width:430px;
+
+}
+
+.login-box h2{
+
+    font-size:42px;
+
+    color:#222;
+
+    margin-bottom:8px;
+
+}
+
+.login-box p{
+
+    color:#777;
+
+    margin-bottom:35px;
+
+}
+
+/* ===========================
+   INPUTS
+=========================== */
+
+.input-box{
+
+    position:relative;
+
+    margin-bottom:22px;
+
+}
+
+.input-box input{
+
+    width:100%;
+
+    padding:16px 50px;
+
+    border:1px solid #ddd;
+
+    border-radius:10px;
+
+    font-size:16px;
+
+    transition:.3s;
+
+}
+
+.input-box input:focus{
+
+    border-color:#16964a;
+
+    outline:none;
+
+    box-shadow:0 0 5px rgba(22,150,74,.25);
+
+}
+
+.input-box i:first-child{
+
+    position:absolute;
+
+    top:18px;
+
+    left:18px;
+
+    color:#888;
+
+}
+
+#togglePassword{
+
+    position:absolute;
+
+    right:18px;
+
+    top:18px;
+
+    cursor:pointer;
+
+    color:#777;
+
+}
+
+/* ===========================
+   LINKS
+=========================== */
+
+.forgot{
+
+    float:right;
+
+    margin-bottom:30px;
+
+    text-decoration:none;
+
+    color:#168f42;
+
+    font-weight:600;
+
+}
+
+.forgot:hover{
+
+    text-decoration:underline;
+
+}
+
+/* ===========================
+   BUTTON
+=========================== */
+
+.btn{
+
+    width:100%;
+
+    padding:16px;
+
+    margin-top:35px;
+
+    border:none;
+
+    border-radius:10px;
+
+    background:#168f42;
+
+    color:#fff;
+
+    font-size:17px;
+
+    cursor:pointer;
+
+    transition:.3s;
+
+}
+
+.btn:hover{
+
+    background:#0d7335;
+
+}
+
+/* ===========================
+   DIVIDER
+=========================== */
+
+.divider{
+
+    display:flex;
+
+    align-items:center;
+
+    margin:35px 0;
+
+}
+
+.divider::before,
+.divider::after{
+
+    content:"";
+
+    flex:1;
+
+    height:1px;
+
+    background:#ddd;
+
+}
+
+.divider span{
+
+    margin:0 15px;
+
+    color:#888;
+
+}
+
+/* ===========================
+   GOOGLE BUTTON
+=========================== */
+
+.google{
+
+    width:100%;
+
+    padding:15px;
+
+    border:1px solid #ddd;
+
+    border-radius:10px;
+
+    background:white;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    gap:12px;
+
+    cursor:pointer;
+
+    transition:.3s;
+
+}
+
+.google:hover{
+
+    background:#f7f7f7;
+
+}
+
+.google img{
+
+    width:24px;
+
+}
+
+/* ===========================
+   SIGN UP
+=========================== */
+
+.signup{
+
+    margin-top:35px;
+
+    text-align:center;
+
+}
+
+.signup a{
+
+    color:#168f42;
+
+    text-decoration:none;
+
+    font-weight:600;
+
+}
+
+/* ===========================
+   RESPONSIVE
+=========================== */
+
+@media(max-width:992px){
+
+.left{
+
+    display:none;
+
+}
+
+.right{
+
+    width:100%;
+
+}
+
+.login-box{
+
+    width:90%;
+
+}
+
+body{
+
+    overflow:auto;
+
+}
+
+}
+
+@media(max-width:480px){
+
+.login-box h2{
+
+    font-size:32px;
+
+}
+
+.overlay h1{
+
+    font-size:40px;
+
+}
+
+}

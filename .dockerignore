@@ -1,0 +1,11 @@
+.git
+oracleJdk-26/
+includes/cache/
+phpinfo.php
+test.php
+Dockerfile
+.dockerignore
+railway.json
+README.md
+.vscode/
+.idea/

@@ -1,0 +1,16 @@
+# Bundled JDK (~370 MB, exceeds GitHub file size limits)
+oracleJdk-26/
+
+# Runtime cache
+includes/cache/
+
+# Debug pages
+phpinfo.php
+test.php
+
+# OS / editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
