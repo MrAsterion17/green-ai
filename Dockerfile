@@ -6,14 +6,14 @@ RUN docker-php-ext-install pdo_mysql mysqli \
 
 # Railway terminates HTTPS at its proxy; trust X-Forwarded-Proto so PHP sees HTTPS
 RUN echo 'SetEnvIf X-Forwarded-Proto "^https$" HTTPS=on' > /etc/apache2/conf-available/railway-https.conf \
-    && a2enconf railway-https
-
-# Pass Railway environment variables (DB, Google OAuth) through to PHP's getenv()
-RUN echo 'variables_order = "EGPCS"' > /usr/local/etc/php/conf.d/env.ini
+    && a2enconf railway-https \
+    && echo 'ServerName localhost' > /etc/apache2/conf-available/servername.conf \
+    && a2enconf servername
 
 COPY . /var/www/html/
 RUN mkdir -p /var/www/html/includes/cache \
     && chown -R www-data:www-data /var/www/html
 
-# Railway injects $PORT at runtime; make Apache listen on it
-CMD ["sh", "-c", "sed -i \"s/Listen 80/Listen ${PORT:-8080}/\" /etc/apache2/ports.conf && sed -i \"s/:80>/:${PORT:-8080}>/\" /etc/apache2/sites-available/000-default.conf && apache2-foreground"]
+# On start: keep exactly one Apache MPM (mod_php needs prefork; two loaded MPMs crash Apache),
+# listen on Railway's $PORT, then run Apache in the foreground.
+CMD ["sh", "-c", "rm -f /etc/apache2/mods-enabled/mpm_event.* /etc/apache2/mods-enabled/mpm_worker.* && a2enmod -q mpm_prefork && PORT=${PORT:-8080} && sed -i \"s/^Listen .*/Listen ${PORT}/\" /etc/apache2/ports.conf && sed -i \"s/<VirtualHost \\*:[0-9]*>/<VirtualHost *:${PORT}>/\" /etc/apache2/sites-available/000-default.conf && echo \"Starting Apache on port ${PORT}\" && exec apache2-foreground"]
