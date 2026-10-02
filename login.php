@@ -504,24 +504,78 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['google_jwt']) && emp
       }
     });
 
-    document.getElementById("btnSignUp").addEventListener("click", () => {
-      const e = document.getElementById("email").value;
+    // Turn Firebase error codes into messages a resident can act on
+    function friendlyAuthError(err) {
+      const messages = {
+        "auth/invalid-email": "Please enter a valid email address.",
+        "auth/missing-password": "Please enter your password.",
+        "auth/weak-password": "Password must be at least 6 characters.",
+        "auth/email-already-in-use": "An account with this email already exists. Click Sign In instead.",
+        "auth/invalid-credential": "Incorrect email or password.",
+        "auth/wrong-password": "Incorrect email or password.",
+        "auth/user-not-found": "No account found with this email. Click Sign Up to create one.",
+        "auth/too-many-requests": "Too many attempts. Please wait a moment and try again.",
+        "auth/network-request-failed": "Network error. Check your internet connection.",
+        "auth/popup-closed-by-user": "Google sign-in was cancelled.",
+        "auth/unauthorized-domain": "Google sign-in is not enabled for this website yet (add this domain in Firebase Authorized domains)."
+      };
+      return messages[err.code] || err.message;
+    }
+
+    function readCredentials() {
+      const e = document.getElementById("email").value.trim();
       const p = document.getElementById("password").value;
-      firebaseAuth.createUserWithEmailAndPassword(auth, e, p)
-        .catch(err => alert("Sign Up Error: " + err.message));
+      if (!e) { alert("Please enter your email address."); return null; }
+      if (!p) { alert("Please enter your password."); return null; }
+      return { e, p };
+    }
+
+    // Create the PHP session for a Firebase-authenticated user, then open the dashboard
+    async function syncToServer(user, source) {
+      const body = new FormData();
+      body.append("firebase_login", "1");
+      body.append("firebase_email", user.email);
+      body.append("firebase_fullname", user.displayName || user.email.split("@")[0]);
+      body.append("firebase_source", source);
+      body.append("ajax", "1");
+      const res = await fetch("login.php", { method: "POST", body });
+      const data = await res.json();
+      if (data.status !== "success") throw new Error(data.message || "Login failed.");
+      window.location.href = "index.php";
+    }
+
+    document.getElementById("btnSignUp").addEventListener("click", async () => {
+      const cred = readCredentials();
+      if (!cred) return;
+      try {
+        const result = await firebaseAuth.createUserWithEmailAndPassword(auth, cred.e, cred.p);
+        await syncToServer(result.user, "signup");
+      } catch (err) {
+        alert("Sign Up Error: " + friendlyAuthError(err));
+      }
     });
 
-    document.getElementById("btnSignIn").addEventListener("click", () => {
-      const e = document.getElementById("email").value;
-      const p = document.getElementById("password").value;
-      firebaseAuth.signInWithEmailAndPassword(auth, e, p)
-        .catch(err => alert("Sign In Error: " + err.message));
+    document.getElementById("btnSignIn").addEventListener("click", async () => {
+      const cred = readCredentials();
+      if (!cred) return;
+      try {
+        const result = await firebaseAuth.signInWithEmailAndPassword(auth, cred.e, cred.p);
+        await syncToServer(result.user, "signin");
+      } catch (err) {
+        // Not a Firebase account (e.g. created on the Sign up page): use the regular
+        // email + password + residence login handled by PHP.
+        document.getElementById("loginForm").submit();
+      }
     });
 
-    document.getElementById("btnGoogle").addEventListener("click", () => {
-      const provider = new firebaseAuth.GoogleAuthProvider();
-      firebaseAuth.signInWithPopup(auth, provider)
-        .catch(err => alert("Google Error: " + err.message));
+    document.getElementById("btnGoogle").addEventListener("click", async () => {
+      try {
+        const provider = new firebaseAuth.GoogleAuthProvider();
+        const result = await firebaseAuth.signInWithPopup(auth, provider);
+        await syncToServer(result.user, "google");
+      } catch (err) {
+        alert("Google Error: " + friendlyAuthError(err));
+      }
     });
 
     document.getElementById("btnSignOut").addEventListener("click", () => {
