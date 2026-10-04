@@ -38,7 +38,10 @@ function greenai_weather_code_info($code) {
 }
 
 function greenai_get_weather() {
-    $cacheDir  = __DIR__ . '/cache';
+    // The server (e.g. Railway) runs in UTC; Open-Meteo returns local-time hours, so match them.
+    date_default_timezone_set(GREENAI_WEATHER_TZ);
+
+    $cacheDir = __DIR__ . '/cache';
     $cacheFile = $cacheDir . '/weather.json';
 
     if (!is_dir($cacheDir)) {
@@ -66,13 +69,22 @@ function greenai_get_weather() {
         $ch = curl_init($url);
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT        => 6,
+            CURLOPT_TIMEOUT        => 10,
+            CURLOPT_CONNECTTIMEOUT => 5,
             CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_IPRESOLVE      => CURL_IPRESOLVE_V4, // hosted containers often lack working IPv6
+            CURLOPT_USERAGENT      => 'Green-AI/1.0',
         ]);
         $raw = curl_exec($ch);
+        if ($raw === false) {
+            error_log('Green-AI weather: curl failed: ' . curl_error($ch));
+        }
         curl_close($ch);
-    } elseif (ini_get('allow_url_fopen')) {
-        $context = stream_context_create(['http' => ['timeout' => 6]]);
+    }
+
+    if (!$raw && ini_get('allow_url_fopen')) {
+        $context = stream_context_create(['http' => ['timeout' => 10, 'header' => "User-Agent: Green-AI/1.0\r\n"]]);
         $raw = @file_get_contents($url, false, $context);
     }
 
