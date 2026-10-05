@@ -11,13 +11,20 @@ if (session_status() === PHP_SESSION_NONE) {
 // Locate security verification structures by stepping up out of the dashboard folder
 require_once '../includes/session.php';
 require_once '../includes/db.php';
+require_once '../includes/weather.php';
 
 if (!isset($_SESSION['user'])) {
     header("Location: ../login.php");
     exit();
 }
 
-$fullname = $_SESSION['user']['fullname'] ?? 'Jc Salvador';
+$fullname = $_SESSION['user']['fullname'] ?? 'User';
+
+$weather = greenai_get_weather();
+$hasWeather = empty($weather['error']) && isset($weather['current_weather']);
+$weatherTemp = $hasWeather ? round($weather['current_weather']['temperature']) : null;
+$weatherInfo = $hasWeather ? greenai_weather_code_info($weather['current_weather']['weathercode']) : ['label' => 'Unavailable', 'icon' => 'fa-cloud-question'];
+$weatherLabel = $weather['label'] ?? GREENAI_WEATHER_LABEL;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -41,10 +48,28 @@ $fullname = $_SESSION['user']['fullname'] ?? 'Jc Salvador';
                 </h1>
                 <p class="text-gray-400 text-xs font-semibold mt-0.5">Export historical microgrid logging tables, summary breakdowns, and auditing data structures.</p>
             </div>
-            
-            <button onclick="window.print()" class="px-4 py-2 bg-[#15803d] hover:bg-[#12652f] text-white text-xs font-black rounded-xl transition-all shadow-xs flex items-center gap-2 cursor-pointer">
-                <i class="fa-solid fa-download"></i> Print Full Audit
-            </button>
+
+            <div class="flex items-center gap-3">
+                <div class="flex items-center gap-3 text-xs font-bold text-slate-600">
+                    <div class="flex items-center gap-2 bg-gray-50 border border-gray-100 px-3 py-1.5 rounded-xl">
+                        <span class="text-gray-400 text-[10px] uppercase font-black">System Status</span>
+                        <span class="flex items-center gap-1 text-emerald-600 font-black"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Normal</span>
+                    </div>
+                    <div class="flex items-center gap-2 bg-gray-50 border border-gray-100 px-3 py-1.5 rounded-xl">
+                        <i class="fa-solid <?php echo $weatherInfo['icon']; ?> text-amber-500 text-sm"></i>
+                        <div>
+                            <span class="block font-black text-slate-800 leading-none"><?php echo $hasWeather ? $weatherTemp : '--'; ?>°C</span>
+                            <span class="text-[9px] text-gray-400 leading-none"><?php echo htmlspecialchars(explode(',', $weatherLabel)[0]); ?></span>
+                        </div>
+                    </div>
+                    <div class="inline-flex items-center gap-2 rounded-2xl bg-emerald-50 border border-emerald-100 px-3 py-2 text-xs font-black text-emerald-700">
+                        <i class="fa-solid fa-circle-user"></i> <?php echo htmlspecialchars($fullname); ?>
+                    </div>
+                </div>
+                <button onclick="window.print()" class="px-4 py-2 bg-[#15803d] hover:bg-[#12652f] text-white text-xs font-black rounded-xl transition-all shadow-xs flex items-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-download"></i> Print Full Audit
+                </button>
+            </div>
         </header>
 
         <main class="p-8 space-y-6 flex-grow overflow-y-auto max-w-6xl w-full">

@@ -21,7 +21,7 @@ if (!isset($_SESSION['user'])) {
 }
 
 // Safely pull verified profile records from the application state
-$fullname = $_SESSION['user']['fullname'] ?? 'Jc Salvador';
+$fullname = $_SESSION['user']['fullname'] ?? 'User';
 $email = $_SESSION['user']['email'] ?? 'user@example.com';
 ?>
 <!DOCTYPE html>

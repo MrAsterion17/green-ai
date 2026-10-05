@@ -10,6 +10,7 @@ error_reporting(E_ALL);
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/session.php';
+require_once __DIR__ . '/../includes/weather.php';
 require_once __DIR__ . '/../includes/support_schema.php';
 greenai_ensure_support_tables($pdo);
 
@@ -20,6 +21,12 @@ if (!isset($_SESSION['user'])) {
 
 $fullname = $_SESSION['user']['fullname'] ?? 'User';
 $userId = $_SESSION['user']['id'];
+
+$weather = greenai_get_weather();
+$hasWeather = empty($weather['error']) && isset($weather['current_weather']);
+$weatherTemp = $hasWeather ? round($weather['current_weather']['temperature']) : null;
+$weatherInfo = $hasWeather ? greenai_weather_code_info($weather['current_weather']['weathercode']) : ['label' => 'Unavailable', 'icon' => 'fa-cloud-question'];
+$weatherLabel = $weather['label'] ?? GREENAI_WEATHER_LABEL;
 
 $success = '';
 $error = '';
@@ -66,12 +73,24 @@ $prefillSubject = $_GET['subject'] ?? '';
     <?php include '../includes/sidebar.php'; ?>
 
     <div class="flex-grow min-w-0 flex flex-col min-h-screen">
-        <header class="w-full bg-white border-b border-gray-100 px-8 py-5 flex justify-between items-center shrink-0">
+        <header class="w-full bg-white border-b border-gray-100 px-8 py-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shrink-0">
             <div>
                 <h1 class="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
                     <i class="fa-solid fa-headset text-[#15803d]"></i> After-Sales Support
                 </h1>
                 <p class="text-gray-400 text-xs font-semibold mt-0.5">Report equipment or website issues and track their resolution.</p>
+            </div>
+            <div class="flex items-center gap-3 text-xs font-bold text-slate-600">
+                <div class="flex items-center gap-2 bg-gray-50 border border-gray-100 px-3 py-1.5 rounded-xl">
+                    <i class="fa-solid <?php echo $weatherInfo['icon']; ?> text-amber-500 text-sm"></i>
+                    <div>
+                        <span class="block font-black text-slate-800 leading-none"><?php echo $hasWeather ? $weatherTemp : '--'; ?>°C</span>
+                        <span class="text-[9px] text-gray-400 leading-none"><?php echo htmlspecialchars(explode(',', $weatherLabel)[0]); ?></span>
+                    </div>
+                </div>
+                <div class="inline-flex items-center gap-2 rounded-2xl bg-emerald-50 border border-emerald-100 px-3 py-2 text-xs font-black text-emerald-700">
+                    <i class="fa-solid fa-circle-user"></i> <?php echo htmlspecialchars($fullname); ?>
+                </div>
             </div>
         </header>
 
