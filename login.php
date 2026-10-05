@@ -390,16 +390,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['google_jwt']) && emp
 
                     <div class="flex flex-col gap-2" id="residentButtons">
                         <button type="button" id="btnSignIn" class="w-full bg-[#1b5e20] hover:bg-[#144517] text-white font-bold py-3 rounded-xl transition-all shadow-xs cursor-pointer text-xs tracking-wide">
-                            Sign In
-                        </button>
-                        <button type="button" id="btnSignUp" class="w-full border border-gray-200 hover:bg-gray-50 text-gray-700 font-bold py-3 rounded-xl transition-all shadow-xs cursor-pointer text-xs tracking-wide">
-                            Sign Up
-                        </button>
-                        <button type="button" id="btnSignOut" style="display:none;" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition-all shadow-xs cursor-pointer text-xs tracking-wide">
-                            Sign Out
+                            Log In
                         </button>
                     </div>
-                    <p id="status" class="text-center text-xs font-semibold text-gray-600">Status: Checking authentication...</p>
 
                     <div id="adminButtons" class="hidden">
                         <button type="submit" class="w-full bg-[#1b5e20] hover:bg-[#144517] text-white font-bold py-3 rounded-xl transition-all shadow-xs cursor-pointer text-xs tracking-wide">
@@ -489,18 +482,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['google_jwt']) && emp
     }
 
     firebaseAuth.onAuthStateChanged(auth, (user) => {
-      const statusTxt = document.getElementById("status");
-      const btnSignOut = document.getElementById("btnSignOut");
-
       if (user) {
-        statusTxt.innerText = `Logged in as: ${user.email}`;
-        statusTxt.style.color = "green";
-        btnSignOut.style.display = "inline-block";
         setupPresenceSystem(user);
-      } else {
-        statusTxt.innerText = "Status: Not logged in";
-        statusTxt.style.color = "black";
-        btnSignOut.style.display = "none";
       }
     });
 
@@ -544,16 +527,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['google_jwt']) && emp
       window.location.href = "index.php";
     }
 
-    document.getElementById("btnSignUp").addEventListener("click", async () => {
-      const cred = readCredentials();
-      if (!cred) return;
-      try {
-        const result = await firebaseAuth.createUserWithEmailAndPassword(auth, cred.e, cred.p);
-        await syncToServer(result.user, "signup");
-      } catch (err) {
-        alert("Sign Up Error: " + friendlyAuthError(err));
-      }
-    });
 
     document.getElementById("btnSignIn").addEventListener("click", async () => {
       const cred = readCredentials();
@@ -578,8 +551,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['google_jwt']) && emp
       }
     });
 
-    document.getElementById("btnSignOut").addEventListener("click", () => {
-      firebaseAuth.signOut(auth);
+    // Pressing Enter in resident mode goes through the same Firebase-then-PHP path as the Log In button
+    document.getElementById("loginForm").addEventListener("submit", (e) => {
+      if (document.getElementById("loginTypeInput").value === "admin") return;
+      e.preventDefault();
+      document.getElementById("btnSignIn").click();
     });
     </script>
 
@@ -591,7 +567,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['google_jwt']) && emp
         document.getElementById('residenceField').classList.toggle('hidden', isAdmin);
         document.getElementById('adminKeyField').classList.toggle('hidden', !isAdmin);
         document.getElementById('residentButtons').classList.toggle('hidden', isAdmin);
-        document.getElementById('status').classList.toggle('hidden', isAdmin);
         document.getElementById('adminButtons').classList.toggle('hidden', !isAdmin);
         document.getElementById('googleSignInBlock').classList.toggle('hidden', isAdmin);
         document.getElementById('signupRow').classList.toggle('hidden', isAdmin);
