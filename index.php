@@ -63,81 +63,9 @@ $energyOverviewLiveJson = json_encode([
         }
     </style>
 </head>
-<body class="bg-[#f4f7f6] font-sans min-h-screen text-slate-800 antialiased flex m-0 p-0">
+<body class="bg-[#f8fafc] font-sans min-h-screen text-slate-800 antialiased flex m-0 p-0">
 
-    <div id="mobileTopbar" class="md:hidden fixed top-0 left-0 right-0 z-20 h-14 bg-white/95 backdrop-blur-sm border-b border-slate-100 shadow-sm flex items-center gap-3 px-4">
-        <button onclick="toggleMobileSidebar()" aria-label="Open menu" class="w-9 h-9 rounded-lg flex items-center justify-center text-slate-700 hover:bg-slate-100 transition-all cursor-pointer border-0 bg-transparent text-base">
-            <i class="fa-solid fa-bars"></i>
-        </button>
-        <div class="flex items-center gap-2">
-            <span class="text-lg">🌱</span>
-            <span class="text-xs font-black text-slate-800 tracking-wide uppercase">Green-AI</span>
-        </div>
-    </div>
-
-    <div id="mobileSidebarBackdrop" onclick="toggleMobileSidebar(false)" class="md:hidden fixed inset-0 bg-slate-900/40 z-30 hidden"></div>
-
-    <aside id="mainSidebar" class="w-64 bg-[#1b5e20] shrink-0 min-h-screen flex flex-col justify-between p-5 text-white fixed inset-y-0 left-0 z-40 -translate-x-full transition-transform duration-300 ease-in-out md:relative md:inset-auto md:translate-x-0 md:z-auto md:flex">
-        <div class="space-y-8">
-            <a href="index.php" class="flex items-center space-x-2.5 px-2 group cursor-pointer">
-                <span class="text-2xl filter drop-shadow-md">🌱</span>
-                <div class="flex flex-col">
-                    <span class="text-xl font-black tracking-wider leading-none">Green-AI</span>
-                    <span class="text-[10px] text-emerald-200 font-bold tracking-widest mt-1">SMART ENERGY HOUSING</span>
-                </div>
-            </a>
-
-            <nav class="space-y-1">
-                <a href="index.php" class="flex items-center gap-3 bg-white/10 text-white text-xs font-black px-4 py-3 rounded-xl transition-all shadow-xs">
-                    <i class="fa-solid fa-chart-pie text-sm"></i> Dashboard
-                </a>
-                <a href="dashboard/monitoring.php" class="flex items-center gap-3 text-emerald-100/70 hover:text-white hover:bg-white/5 text-xs font-bold px-4 py-3 rounded-xl transition-all">
-                    <i class="fa-solid fa-bolt text-sm"></i> Live Monitoring
-                </a>
-                <a href="dashboard/home.php" class="flex items-center gap-3 text-emerald-100/70 hover:text-white hover:bg-white/5 text-xs font-bold px-4 py-3 rounded-xl transition-all">
-                    <i class="fa-solid fa-clock-rotate-left text-sm"></i> Energy History
-                </a>
-                <a href="dashboard/prediction.php" class="flex items-center gap-3 text-emerald-100/70 hover:text-white hover:bg-white/5 text-xs font-bold px-4 py-3 rounded-xl transition-all">
-                    <i class="fa-solid fa-microchip text-sm"></i> AI Predictions
-                </a>
-                <a href="dashboard/profile.php" class="flex items-center gap-3 text-emerald-100/70 hover:text-white hover:bg-white/5 text-xs font-bold px-4 py-3 rounded-xl transition-all">
-                    <i class="fa-solid fa-wand-magic-sparkles text-sm"></i> Insights & Tips
-                </a>
-                <a href="dashboard/monitoring.php" class="flex items-center gap-3 text-emerald-100/70 hover:text-white hover:bg-white/5 text-xs font-bold px-4 py-3 rounded-xl transition-all">
-                    <i class="fa-solid fa-laptop-circuit text-sm"></i> Devices
-                </a>
-                <a href="#alerts-section" class="flex items-center gap-3 text-emerald-100/70 hover:text-white hover:bg-white/5 text-xs font-bold px-4 py-3 rounded-xl transition-all">
-                    <i class="fa-solid fa-bell text-sm"></i> Alerts
-                </a>
-                <a href="dashboard/support.php" class="flex items-center gap-3 text-emerald-100/70 hover:text-white hover:bg-white/5 text-xs font-bold px-4 py-3 rounded-xl transition-all">
-                    <i class="fa-solid fa-headset text-sm"></i> After Sales Support
-                </a>
-                <a href="dashboard/reports.php" class="flex items-center gap-3 text-emerald-100/70 hover:text-white hover:bg-white/5 text-xs font-bold px-4 py-3 rounded-xl transition-all">
-                    <i class="fa-solid fa-file-invoice text-sm"></i> Reports
-                </a>
-                <a href="dashboard/settings.php" class="flex items-center gap-3 text-emerald-100/70 hover:text-white hover:bg-white/5 text-xs font-bold px-4 py-3 rounded-xl transition-all">
-                    <i class="fa-solid fa-sliders text-sm"></i> Settings
-                </a>
-            </nav>
-        </div>
-
-        <div class="space-y-4 border-t border-white/10 pt-4">
-            <div class="flex items-center justify-between text-[11px] text-emerald-200 font-bold px-2 cursor-pointer" onclick="window.location.href='dashboard/settings.php'">
-                <span><i class="fa-solid fa-house text-xs mr-1"></i> Household Residence</span>
-                <i class="fa-solid fa-chevron-down text-[9px]"></i>
-            </div>
-            <div class="bg-black/10 border border-white/5 p-3 rounded-xl flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-xs font-black"><i class="fa-regular fa-user"></i></div>
-                <div class="flex-grow min-w-0 cursor-pointer" onclick="window.location.href='dashboard/settings.php'">
-                    <span class="block text-xs font-black truncate"><?php echo htmlspecialchars($fullname); ?></span>
-                    <span class="block text-[9px] text-emerald-200 font-bold truncate">Homeowner</span>
-                </div>
-                <a href="logout.php" class="text-white/70 hover:text-red-300 transition-colors cursor-pointer" title="Sign Out Securely">
-                    <i class="fa-solid fa-right-from-bracket text-xs"></i>
-                </a>
-            </div>
-        </div>
-    </aside>
+    <?php include __DIR__ . "/includes/sidebar.php"; ?>
 
     <div class="flex-grow min-w-0 flex flex-col min-h-screen">
         
@@ -379,26 +307,6 @@ $energyOverviewLiveJson = json_encode([
             &copy; <?php echo date('Y'); ?> Green-AI Smart Home Framework. All rights reserved.
         </footer>
     </div>
-
-    <script>
-    function toggleMobileSidebar(show) {
-        const sidebar = document.getElementById('mainSidebar');
-        const backdrop = document.getElementById('mobileSidebarBackdrop');
-        if (!sidebar || !backdrop) return;
-
-        const isOpen = !sidebar.classList.contains('-translate-x-full');
-        const shouldOpen = (typeof show === 'boolean') ? show : !isOpen;
-
-        sidebar.classList.toggle('-translate-x-full', !shouldOpen);
-        backdrop.classList.toggle('hidden', !shouldOpen);
-    }
-
-    document.querySelectorAll('#mainSidebar a').forEach(function (link) {
-        link.addEventListener('click', function () {
-            if (window.innerWidth < 768) toggleMobileSidebar(false);
-        });
-    });
-    </script>
 
     <script>
     // Real per-resident simulated data (deterministic per user id — see
