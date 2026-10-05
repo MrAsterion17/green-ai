@@ -14,14 +14,6 @@ if (!isset($_SESSION['user'])) {
 $fullname = $_SESSION['user']['fullname'] ?? $_SESSION['fullname'] ?? 'Green-AI User';
 $email = $_SESSION['user']['email'] ?? '';
 
-// Live plant readings — XRC-Batangas-734.08kW GridTiedSystem (iSolarCloud, 01/Sep/2026)
-$plantName = 'XRC-Batangas-734.08kW GridTiedSystem';
-$inverterDailyGeneration = 502.20 + 514.20 + 502.70 + 510.20 + 495.80; // kWh, Inverter1-5
-$inverterActivePower = 38.06 + 36.01 + 33.20 + 36.52 + 37.89; // kW, Inverter1-5 (Inverter3 reading partially obscured in source screenshot)
-$zeroExportMeterPower = 308.80; // kW
-$zeroExportMeterReactive = 246.80; // kVar
-$meteoTransientIrradiance = 286; // W/m^2
-$meteoDailyIrradiation = 3.907; // kWh/m^2
 
 // 4. PER-RESIDENT ENERGY OVERVIEW — each household gets its own auto-provisioned
 // rooftop system (deterministic from their user id), so the Energy Overview
@@ -48,6 +40,9 @@ $energyOverviewLiveJson = json_encode([
     'batteryPct'    => $liveBatteryNow['soc_pct'],
     'hasBattery'    => true,
 ]);
+
+// Same resident snapshot the Live Monitoring page uses (liveFlow, todayProductionKwh, ...).
+extract(greenai_solar_dashboard_snapshot($plant));
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -75,7 +70,6 @@ $energyOverviewLiveJson = json_encode([
                     <i class="fa-solid fa-chart-line text-[#15803d]"></i> Smart Home Dashboard
                 </h1>
                 <p class="text-slate-500 text-sm mt-1">Overview of your energy, storage, and AI forecasts with the Green-AI dashboard style.</p>
-                <p class="text-emerald-700 text-[11px] font-bold mt-1"><i class="fa-solid fa-satellite-dish"></i> Live plant: <?php echo htmlspecialchars($plantName); ?></p>
             </div>
             <div class="inline-flex items-center gap-3 rounded-3xl bg-emerald-50 border border-emerald-100 px-4 py-3 text-xs font-black text-emerald-700">
                 <span>Good morning, <?php echo htmlspecialchars(explode(' ', $fullname)[0]); ?>!</span>
@@ -87,57 +81,56 @@ $energyOverviewLiveJson = json_encode([
 
         <main class="p-8 space-y-6 flex-grow overflow-y-auto max-w-7xl w-full mx-auto">
             
+            <?php
+            $cardBase = 'bg-white p-5 rounded-3xl border border-slate-100 shadow-xs space-y-3';
+            $labelCls = 'block text-[11px] font-bold text-slate-400 uppercase tracking-wider';
+            $valCls   = 'block text-2xl font-black text-slate-900 tracking-tight';
+            $unitCls  = 'text-xs font-black text-gray-400';
+            $subCls   = 'flex items-center gap-1.5 text-[11px] font-bold text-gray-400';
+            ?>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-xs space-y-3">
+                <div class="<?php echo $cardBase; ?>">
                     <div class="flex justify-between items-start">
                         <div class="space-y-0.5">
-                            <span class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider">Solar Generation (Today)</span>
-                            <strong class="block text-2xl font-black text-slate-900 tracking-tight"><?php echo number_format($inverterDailyGeneration, 2); ?> <span class="text-xs font-black text-gray-400">kWh</span></strong>
+                            <span class="<?php echo $labelCls; ?>">Solar Generation (Today)</span>
+                            <strong class="<?php echo $valCls; ?>"><?php echo number_format($todayProductionKwh, 1); ?> <span class="<?php echo $unitCls; ?>">kWh</span></strong>
                         </div>
                         <span class="w-8 h-8 rounded-xl bg-amber-50 border border-amber-100 text-amber-500 flex items-center justify-center text-sm"><i class="fa-solid fa-solar-panel"></i></span>
                     </div>
-                    <div class="flex items-center gap-1.5 text-[11px] font-bold text-gray-400">
-                        Across Inverter1&ndash;5
-                    </div>
+                    <div class="<?php echo $subCls; ?>">From your rooftop system</div>
                 </div>
 
-                <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-xs space-y-3">
+                <div class="<?php echo $cardBase; ?>">
                     <div class="flex justify-between items-start">
                         <div class="space-y-0.5">
-                            <span class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider">Live Inverter Output</span>
-                            <strong class="block text-2xl font-black text-slate-900 tracking-tight"><?php echo number_format($inverterActivePower, 2); ?> <span class="text-xs font-black text-gray-400">kW</span></strong>
+                            <span class="<?php echo $labelCls; ?>">Live Solar Output</span>
+                            <strong class="<?php echo $valCls; ?>"><?php echo number_format($liveFlow['pv_kw'], 2); ?> <span class="<?php echo $unitCls; ?>">kW</span></strong>
                         </div>
                         <span class="w-8 h-8 rounded-xl bg-blue-50 border border-blue-100 text-blue-500 flex items-center justify-center text-sm"><i class="fa-solid fa-bolt"></i></span>
                     </div>
-                    <div class="flex items-center gap-1.5 text-[11px] font-bold text-gray-400">
-                        Combined active power, Inverter1&ndash;5
-                    </div>
+                    <div class="<?php echo $subCls; ?>"><?php echo $liveFlow['pv_kw'] > 0 ? 'Generating now' : 'No sunlight right now'; ?></div>
                 </div>
 
-                <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-xs space-y-3">
+                <div class="<?php echo $cardBase; ?>">
                     <div class="flex justify-between items-start">
                         <div class="space-y-0.5">
-                            <span class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider">Zero-Export Meter</span>
-                            <strong class="block text-2xl font-black text-slate-900 tracking-tight"><?php echo number_format($zeroExportMeterPower, 2); ?> <span class="text-xs font-black text-gray-400">kW</span></strong>
+                            <span class="<?php echo $labelCls; ?>">House Load</span>
+                            <strong class="<?php echo $valCls; ?>"><?php echo number_format($liveFlow['load_kw'], 2); ?> <span class="<?php echo $unitCls; ?>">kW</span></strong>
                         </div>
-                        <span class="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center text-sm"><i class="fa-solid fa-plug-circle-bolt"></i></span>
+                        <span class="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center text-sm"><i class="fa-solid fa-house-laptop"></i></span>
                     </div>
-                    <div class="flex items-center gap-1.5 text-[11px] font-bold text-gray-400">
-                        Reactive power <?php echo number_format($zeroExportMeterReactive, 2); ?> kVar
-                    </div>
+                    <div class="<?php echo $subCls; ?>">Current home consumption</div>
                 </div>
 
-                <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-xs space-y-3">
+                <div class="<?php echo $cardBase; ?>">
                     <div class="flex justify-between items-start">
                         <div class="space-y-0.5">
-                            <span class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider">Solar Irradiance</span>
-                            <strong class="block text-2xl font-black text-emerald-600 tracking-tight"><?php echo number_format($meteoDailyIrradiation, 3); ?> <span class="text-xs font-black text-gray-400">kWh/m&sup2;</span></strong>
+                            <span class="<?php echo $labelCls; ?>"><?php echo $liveFlow['grid_kw'] > 0 ? 'Grid Import' : 'Grid Export'; ?></span>
+                            <strong class="<?php echo $valCls; ?> text-emerald-600"><?php echo number_format(abs($liveFlow['grid_kw']), 2); ?> <span class="<?php echo $unitCls; ?>">kW</span></strong>
                         </div>
-                        <span class="w-8 h-8 rounded-xl bg-green-50 border border-green-100 text-green-600 flex items-center justify-center text-sm"><i class="fa-solid fa-sun"></i></span>
+                        <span class="w-8 h-8 rounded-xl bg-purple-50 border border-purple-100 text-purple-500 flex items-center justify-center text-sm"><i class="fa-solid fa-tower-broadcast"></i></span>
                     </div>
-                    <div class="flex items-center gap-1.5 text-[11px] font-bold text-slate-500">
-                        <span>Transient irradiance: <strong class="text-slate-800 font-extrabold"><?php echo $meteoTransientIrradiance; ?> W/m&sup2;</strong> &middot; Meteo Station1</span>
-                    </div>
+                    <div class="<?php echo $subCls; ?>"><?php echo $liveFlow['grid_kw'] > 0 ? 'Drawing from the grid' : 'Surplus feeding grid'; ?></div>
                 </div>
             </div>
 
