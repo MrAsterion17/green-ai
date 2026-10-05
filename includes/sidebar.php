@@ -102,6 +102,12 @@ if ($sidebar_initials === '') {
                 Reports
             </a>
 
+            <?php $is_wthr = ($current_page == 'weather.php'); ?>
+            <a href="/dashboard/weather.php" class="flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-black tracking-wide transition-all group <?php echo $is_wthr ? 'text-white bg-white/10 border border-white/10 shadow-xs' : 'text-emerald-100 hover:bg-white/10 hover:text-white'; ?>">
+                <span class="w-5 text-center <?php echo $is_wthr ? 'text-white' : 'text-emerald-200 group-hover:text-white'; ?>"><i class="fa-solid fa-cloud-sun"></i></span>
+                Real-time Forecasting
+            </a>
+
             <?php $is_set = ($current_page == 'settings.php'); ?>
             <a href="/dashboard/settings.php" class="flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-black tracking-wide transition-all group <?php echo $is_set ? 'text-white bg-white/10 border border-white/10 shadow-xs' : 'text-emerald-100 hover:bg-white/10 hover:text-white'; ?>">
                 <span class="w-5 text-center <?php echo $is_set ? 'text-white' : 'text-emerald-200 group-hover:text-white'; ?>"><i class="fa-solid fa-sliders"></i></span>
