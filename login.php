@@ -40,6 +40,9 @@ function sendJsonResponse($status, $message = '', $user = []) {
 
 // 2. HANDLE GOOGLE AUTHENTICATION (AJAX REQUEST)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['google_jwt'])) {
+    // Disabled: this handler decoded the token without verifying its signature, so anyone could forge it.
+    // Google sign-in now goes through the verified Firebase flow (section 3).
+    sendJsonResponse('error', 'This sign-in method is no longer supported.');
     $jwt = $_POST['google_jwt'];
     
     $parts = explode('.', $jwt);
@@ -93,9 +96,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['google_jwt'])) {
 
 // 3. HANDLE FIREBASE AUTHENTICATION SYNC
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['firebase_login'])) {
-    $email = trim($_POST['firebase_email'] ?? '');
-    $fullname = trim($_POST['firebase_fullname'] ?? 'Eco User');
     $source = trim($_POST['firebase_source'] ?? 'website');
+    $email = '';
+    $fullname = 'Eco User';
+
+    // Never trust an email sent by the browser: ask Firebase who this ID token belongs to.
+    $idToken = trim($_POST['firebase_id_token'] ?? '');
+    if ($idToken !== '') {
+        $ch = curl_init('https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=' . urlencode('AIzaSyCAtkDtFSDuVxbHQ66SFtVLDbcPPSoeUdc'));
+        curl_setopt_array($ch, [
+            CURLOPT_POST           => true,
+            CURLOPT_POSTFIELDS     => json_encode(['idToken' => $idToken]),
+            CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT        => 10,
+            CURLOPT_IPRESOLVE      => CURL_IPRESOLVE_V4,
+        ]);
+        $lookupRaw = curl_exec($ch);
+        curl_close($ch);
+        $lookup = $lookupRaw ? json_decode($lookupRaw, true) : null;
+        $fbUser = $lookup['users'][0] ?? null;
+        if ($fbUser && !empty($fbUser['email'])) {
+            $email = strtolower(trim($fbUser['email']));
+            $fullname = trim($fbUser['displayName'] ?? '') ?: explode('@', $email)[0];
+        }
+    }
 
     if (!empty($email)) {
         $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ?");
@@ -517,8 +542,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['google_jwt']) && emp
     async function syncToServer(user, source) {
       const body = new FormData();
       body.append("firebase_login", "1");
-      body.append("firebase_email", user.email);
-      body.append("firebase_fullname", user.displayName || user.email.split("@")[0]);
+      body.append("firebase_id_token", await user.getIdToken());
       body.append("firebase_source", source);
       body.append("ajax", "1");
       const res = await fetch("login.php", { method: "POST", body });
