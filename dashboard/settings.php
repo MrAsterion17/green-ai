@@ -45,7 +45,7 @@ $battery_alert_threshold = 20; // %
 
     <div class="flex-grow min-w-0 flex flex-col min-h-screen">
         
-        <header class="w-full bg-white border-b border-slate-100 px-8 py-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shrink-0">
+        <header class="w-full bg-white border-b border-slate-100 px-4 sm:px-8 py-4 sm:py-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shrink-0">
             <div>
                 <h1 class="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
                     <i class="fa-solid fa-sliders text-[#15803d]"></i> Portal Configuration
@@ -58,10 +58,10 @@ $battery_alert_threshold = 20; // %
             </div>
         </header>
 
-        <main class="p-8 space-y-6 flex-grow overflow-y-auto max-w-6xl w-full">
+        <main class="p-4 sm:p-8 space-y-6 flex-grow overflow-x-hidden max-w-6xl w-full min-w-0">
             <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
                 <div class="xl:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-xs space-y-4">
+                    <div class="bg-white p-4 sm:p-6 rounded-3xl border border-slate-100 shadow-xs space-y-4">
                         <div class="flex items-center gap-4">
                             <div class="w-16 h-16 rounded-3xl bg-[#15803d] text-white flex items-center justify-center text-2xl font-black uppercase shadow-md">
                                 <?php echo htmlspecialchars($initials); ?>
@@ -71,19 +71,19 @@ $battery_alert_threshold = 20; // %
                                 <p class="text-[11px] font-semibold text-slate-500 mt-1">Update your profile and system preferences from the same dashboard language.</p>
                             </div>
                         </div>
-                        <div class="grid grid-cols-2 gap-3 text-sm">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                             <div class="rounded-3xl bg-slate-50 border border-slate-100 p-4">
                                 <p class="text-[10px] uppercase tracking-wider font-black text-slate-400">Session</p>
                                 <p class="mt-2 font-black text-slate-900">Active</p>
                             </div>
                             <div class="rounded-3xl bg-slate-50 border border-slate-100 p-4">
                                 <p class="text-[10px] uppercase tracking-wider font-black text-slate-400">Email</p>
-                                <p class="mt-2 font-black text-slate-900"><?php echo htmlspecialchars($email); ?></p>
+                                <p class="mt-2 font-black text-slate-900 break-all"><?php echo htmlspecialchars($email); ?></p>
                             </div>
                         </div>
                     </div>
-                    <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-xs space-y-4">
-                        <div class="flex items-center justify-between gap-3">
+                    <div class="bg-white p-4 sm:p-6 rounded-3xl border border-slate-100 shadow-xs space-y-4">
+                        <div class="flex flex-wrap items-center justify-between gap-3">
                             <div>
                                 <h3 class="text-xs font-black text-slate-900 uppercase tracking-wider">Configuration summary</h3>
                                 <p class="text-[10px] text-slate-400 mt-1">High-level settings matched to the dashboard style.</p>
@@ -105,7 +105,7 @@ $battery_alert_threshold = 20; // %
                         </div>
                     </div>
                 </div>
-                <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-xs space-y-5">
+                <div class="bg-white p-4 sm:p-6 rounded-3xl border border-slate-100 shadow-xs space-y-5">
                     <div class="border-b border-slate-100 pb-3">
                         <h3 class="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
                             <i class="fa-solid fa-cloud-sun text-[#15803d] text-sm"></i> Weather sync
@@ -129,7 +129,7 @@ $battery_alert_threshold = 20; // %
 
             <form action="" method="POST" class="space-y-6" id="portalSettingsForm">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="lg:col-span-2 bg-white p-6 rounded-3xl border border-slate-100 shadow-xs space-y-5">
+                    <div class="lg:col-span-2 bg-white p-4 sm:p-6 rounded-3xl border border-slate-100 shadow-xs space-y-5">
                         <div class="border-b border-slate-100 pb-3">
                             <h3 class="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
                                 <i class="fa-solid fa-id-card text-[#15803d] text-sm"></i> User Credentials
@@ -153,7 +153,7 @@ $battery_alert_threshold = 20; // %
                             </div>
                         </div>
                     </div>
-                    <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-xs space-y-5">
+                    <div class="bg-white p-4 sm:p-6 rounded-3xl border border-slate-100 shadow-xs space-y-5">
                         <div class="border-b border-slate-100 pb-3">
                             <h3 class="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
                                 <i class="fa-solid fa-house-chimney text-[#15803d] text-sm"></i> Property Metadata
@@ -172,7 +172,7 @@ $battery_alert_threshold = 20; // %
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="lg:col-span-2 bg-white p-6 rounded-3xl border border-slate-100 shadow-xs space-y-5">
+                    <div class="lg:col-span-2 bg-white p-4 sm:p-6 rounded-3xl border border-slate-100 shadow-xs space-y-5">
                         <div class="border-b border-slate-100 pb-3">
                             <h3 class="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
                                 <i class="fa-solid fa-bell-concierge text-[#15803d] text-sm"></i> AI Telemetry Notification Thresholds
@@ -198,7 +198,7 @@ $battery_alert_threshold = 20; // %
                             </div>
                         </div>
                     </div>
-                    <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-xs space-y-4 flex flex-col justify-between">
+                    <div class="bg-white p-4 sm:p-6 rounded-3xl border border-slate-100 shadow-xs space-y-4 flex flex-col justify-between">
                         <div>
                             <div class="border-b border-slate-100 pb-3">
                                 <h3 class="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
