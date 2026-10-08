@@ -15,6 +15,9 @@ $fullname = $_SESSION['user']['fullname'] ?? $_SESSION['fullname'] ?? 'Green-AI 
 $email = $_SESSION['user']['email'] ?? '';
 
 
+// 3b. NEW RESIDENTS MUST GIVE SUBDIVISION / BLOCK / LOT FIRST
+require_once __DIR__ . '/includes/session.php';
+
 // 4. PER-RESIDENT ENERGY OVERVIEW — each household gets its own auto-provisioned
 // rooftop system (deterministic from their user id), so the Energy Overview
 // chart below reflects genuinely different, physically-plausible figures per user.
