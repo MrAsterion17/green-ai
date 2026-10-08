@@ -38,6 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_home_sms'])) {
     } else {
         $pdo->prepare("UPDATE users SET Residence = ?, block_no = ?, lot_no = ? WHERE id = ?")
             ->execute([$residenceIn, $blockIn, $lotIn, $userId]);
+        $_SESSION['user']['residence'] = $residenceIn;
         $homeMessage = 'Home address saved.';
     }
 }
@@ -159,7 +160,7 @@ $battery_alert_threshold = 20; // %
                 </div>
             </div>
 
-            <form action="" method="POST" class="bg-white p-4 sm:p-6 rounded-3xl border border-slate-100 shadow-xs space-y-5">
+            <form action="" method="POST" id="home-address" class="bg-white p-4 sm:p-6 rounded-3xl border border-slate-100 shadow-xs space-y-5">
                 <input type="hidden" name="save_home_sms" value="1">
                 <div class="border-b border-slate-100 pb-3">
                     <h3 class="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">

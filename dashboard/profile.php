@@ -23,6 +23,12 @@ if (!isset($_SESSION['user'])) {
 // Safely pull verified profile records from the application state
 $fullname = $_SESSION['user']['fullname'] ?? 'User';
 $email = $_SESSION['user']['email'] ?? 'user@example.com';
+
+require_once __DIR__ . '/../includes/user_schema.php';
+greenai_ensure_user_contact_columns($pdo);
+$homeStmt = $pdo->prepare("SELECT Residence, block_no, lot_no FROM users WHERE id = ?");
+$homeStmt->execute([(int) ($_SESSION['user']['id'] ?? 0)]);
+$home = $homeStmt->fetch() ?: [];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -91,6 +97,20 @@ $email = $_SESSION['user']['email'] ?? 'user@example.com';
                             <input type="email" class="bg-transparent border-0 outline-hidden w-full text-slate-500 cursor-not-allowed" value="<?php echo htmlspecialchars($email); ?>" readonly />
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-2xs overflow-hidden">
+                <div class="p-5 border-b border-slate-50 bg-linear-to-r from-white to-slate-50/50 flex items-center justify-between gap-3">
+                    <h3 class="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-location-dot text-[#15803d]"></i> Home Address
+                    </h3>
+                    <a href="settings.php#home-address" class="px-3 py-1.5 bg-[#15803d] hover:bg-[#0f4f1b] text-white text-[10px] font-black rounded-lg transition-all flex items-center gap-1.5"><i class="fa-solid fa-pen"></i> Edit / Change</a>
+                </div>
+                <div class="p-6 grid grid-cols-1 sm:grid-cols-3 gap-5 text-xs font-semibold text-slate-700">
+                    <div><span class="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Subdivision</span><?php echo htmlspecialchars($home['Residence'] ?? '') ?: 'Not set'; ?></div>
+                    <div><span class="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Block</span><?php echo htmlspecialchars($home['block_no'] ?? '') ?: 'Not set'; ?></div>
+                    <div><span class="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Lot</span><?php echo htmlspecialchars($home['lot_no'] ?? '') ?: 'Not set'; ?></div>
                 </div>
             </div>
 
