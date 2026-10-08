@@ -17,7 +17,7 @@ if (!isset($_SESSION['admin'])) {
 $adminName = $_SESSION['admin']['fullname'] ?? 'Support Agent';
 $activeNav = 'users';
 
-$stmt = $pdo->query("SELECT id, fullname, email, Residence, block_no, lot_no, phone, last_login, created_at FROM users ORDER BY last_login DESC, created_at DESC");
+$stmt = $pdo->query("SELECT id, fullname, email, Residence, block_no, lot_no, last_login, created_at FROM users ORDER BY last_login DESC, created_at DESC");
 $users = $stmt->fetchAll();
 ?>
 <!DOCTYPE html>
@@ -85,7 +85,6 @@ $users = $stmt->fetchAll();
                             <th class="p-4 text-[10px] font-black text-slate-400 uppercase tracking-wider">Resident</th>
                             <th class="p-4 text-[10px] font-black text-slate-400 uppercase tracking-wider">Residence</th>
                             <th class="p-4 text-[10px] font-black text-slate-400 uppercase tracking-wider">Block / Lot</th>
-                            <th class="p-4 text-[10px] font-black text-slate-400 uppercase tracking-wider">Mobile</th>
                             <th class="p-4 text-[10px] font-black text-slate-400 uppercase tracking-wider">Registered</th>
                             <th class="p-4 text-[10px] font-black text-slate-400 uppercase tracking-wider">Last Login</th>
                         </tr>
@@ -93,7 +92,7 @@ $users = $stmt->fetchAll();
                     <tbody class="divide-y divide-slate-100 text-xs font-semibold text-slate-700">
                         <?php if (empty($users)): ?>
                         <tr>
-                            <td colspan="6" class="p-6 text-center text-slate-400 font-bold">No registered residents yet.</td>
+                            <td colspan="5" class="p-6 text-center text-slate-400 font-bold">No registered residents yet.</td>
                         </tr>
                         <?php else: foreach ($users as $u): ?>
                         <tr class="hover:bg-slate-50/80 transition-colors cursor-pointer" onclick="window.location.href='user.php?id=<?php echo (int)$u['id']; ?>'">
@@ -103,7 +102,6 @@ $users = $stmt->fetchAll();
                             </td>
                             <td class="p-4 text-slate-500"><?php echo htmlspecialchars($u['Residence'] ?? 'Not set'); ?></td>
                             <td class="p-4 text-slate-500"><?php echo ($u['block_no'] ?? '') !== '' || ($u['lot_no'] ?? '') !== '' ? 'Blk ' . htmlspecialchars($u['block_no'] ?? '-') . ' Lot ' . htmlspecialchars($u['lot_no'] ?? '-') : 'Not set'; ?></td>
-                            <td class="p-4 text-slate-500"><?php echo htmlspecialchars($u['phone'] ?? '') ?: 'Not set'; ?></td>
                             <td class="p-4 text-slate-500"><?php echo htmlspecialchars(date('M j, Y', strtotime($u['created_at']))); ?></td>
                             <td class="p-4">
                                 <?php if (!empty($u['last_login'])): ?>

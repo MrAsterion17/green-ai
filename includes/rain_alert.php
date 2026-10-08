@@ -3,7 +3,6 @@ require_once __DIR__ . '/weather.php';
 
 define('GREENAI_RAIN_LOOKAHEAD_HOURS', 3);
 define('GREENAI_RAIN_MIN_PROBABILITY', 60); // percent
-define('GREENAI_RAIN_COOLDOWN_HOURS', 6);   // don't text the same resident again within this window
 
 // Looks at the next few hours of the forecast. Returns null when no rain is expected,
 // otherwise ['time' => 'g:i A', 'probability' => int, 'label' => string].
@@ -34,9 +33,4 @@ function greenai_upcoming_rain() {
         }
     }
     return null;
-}
-
-function greenai_rain_sms_text(array $rain) {
-    return "GREEN-AI ALERT: Rain expected around {$rain['time']} ({$rain['probability']}% chance). "
-         . "Harvest & save solar energy NOW - charge your battery and cut non-essential loads.";
 }

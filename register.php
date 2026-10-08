@@ -27,7 +27,6 @@ try {
 }
 
 require_once __DIR__ . '/includes/user_schema.php';
-require_once __DIR__ . '/includes/sms.php';
 greenai_ensure_user_contact_columns($pdo);
 
 $error = "";
@@ -39,8 +38,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $residence = trim($_POST["Residence"] ?? "");
     $blockNo   = trim($_POST["block_no"] ?? "");
     $lotNo     = trim($_POST["lot_no"] ?? "");
-    $phone     = greenai_normalize_phone($_POST["phone"] ?? "");
-    $smsAlerts = isset($_POST["sms_alerts"]) ? 1 : 0;
     $email     = trim($_POST["email"] ?? "");
     $password  = trim($_POST["password"] ?? "");
 
@@ -66,10 +63,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         $error = "Block and Lot may only contain letters, numbers, spaces and dashes.";
 
-    } elseif ($phone === null) {
-
-        $error = "Enter a valid Philippine mobile number (e.g. 0917 123 4567).";
-
     } elseif (!in_array($residence, $allowedResidences)) {
 
         $error = "Registration is only available for residents of Sentrina, Tierra Hermosa, and St. Augustine Village.";
@@ -90,9 +83,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             $insert = $pdo->prepare("
                 INSERT INTO users
-                (fullname, Residence, block_no, lot_no, phone, sms_alerts, email, password)
+                (fullname, Residence, block_no, lot_no, email, password)
                 VALUES
-                (?, ?, ?, ?, ?, ?, ?, ?)
+                (?, ?, ?, ?, ?, ?)
             ");
 
             if ($insert->execute([
@@ -100,8 +93,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $residence,
                 $blockNo,
                 $lotNo,
-                $phone,
-                $smsAlerts,
                 $email,
                 $hashedPassword
             ])) {
@@ -252,20 +243,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </div>
 </div>
 </div>
-
-<!-- Mobile number for SMS alerts -->
-
-<div>
-    <label class="block text-[11px] font-bold text-gray-500 mb-1 tracking-wide uppercase">Mobile Number</label>
-    <div class="relative">
-        <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400"><i class="fa-solid fa-mobile-screen text-sm"></i></span>
-        <input type="text" name="phone" placeholder="0917 123 4567" required inputmode="tel" maxlength="20" class="w-full border border-gray-200 focus:border-[#2e7d32] focus:ring-3 focus:ring-green-700/5 rounded-xl pl-10 pr-4 py-2.5 text-xs outline-hidden transition-all bg-white font-medium text-slate-800">
-    </div>
-</div>
-<label class="flex items-start gap-2 text-[11px] font-semibold text-gray-500 cursor-pointer">
-    <input type="checkbox" name="sms_alerts" value="1" checked class="mt-0.5 accent-[#2e7d32]">
-    <span>Text me when rain is coming so I can harvest and save solar energy.</span>
-</label>
 
 <div>
     <label class="block text-[11px] font-bold text-gray-500 mb-1 tracking-wide uppercase">

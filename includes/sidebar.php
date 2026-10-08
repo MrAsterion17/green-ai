@@ -13,12 +13,44 @@ $sidebar_initials = strtoupper(substr(preg_replace('/[^A-Za-z0-9]/', '', $sideba
 if ($sidebar_initials === '') {
     $sidebar_initials = 'U';
 }
+
+require_once __DIR__ . '/rain_alert.php';
+$rain_alert = null;
+if (!empty($auth_user)) {
+    try {
+        $rain_alert = greenai_upcoming_rain();
+    } catch (Throwable $e) {
+        $rain_alert = null; // never let a weather hiccup break the page
+    }
+}
 ?>
 <style>
 @media (max-width: 767px) {
     body { padding-top: 56px !important; }
 }
 </style>
+
+<?php if ($rain_alert): ?>
+<div id="rainAlertBanner" role="alert" class="fixed top-16 md:top-4 right-3 left-3 md:left-auto md:w-96 z-50 rounded-2xl bg-white border border-sky-200 shadow-xl p-4 flex items-start gap-3 font-sans">
+    <span class="w-9 h-9 shrink-0 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center"><i class="fa-solid fa-cloud-showers-heavy"></i></span>
+    <div class="min-w-0 flex-1">
+        <p class="text-xs font-black text-slate-900">Rain expected around <?php echo htmlspecialchars($rain_alert['time']); ?> (<?php echo (int) $rain_alert['probability']; ?>% chance)</p>
+        <p class="text-[11px] font-semibold text-slate-500 mt-1">Harvest and save solar energy now: charge your battery and cut non-essential loads before the sun goes.</p>
+    </div>
+    <button type="button" onclick="dismissRainAlert()" aria-label="Dismiss" class="text-slate-400 hover:text-slate-600 border-0 bg-transparent cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+</div>
+<script>
+(function () {
+    var key = 'rainAlertDismissed:<?php echo htmlspecialchars($rain_alert['time']); ?>';
+    var banner = document.getElementById('rainAlertBanner');
+    try { if (sessionStorage.getItem(key)) banner.style.display = 'none'; } catch (e) {}
+    window.dismissRainAlert = function () {
+        banner.style.display = 'none';
+        try { sessionStorage.setItem(key, '1'); } catch (e) {}
+    };
+})();
+</script>
+<?php endif; ?>
 
 <div id="mobileTopbar" class="md:hidden fixed top-0 left-0 right-0 z-20 h-14 bg-white/95 backdrop-blur-sm border-b border-slate-100 shadow-sm flex items-center gap-3 px-4">
     <button onclick="toggleMobileSidebar()" aria-label="Open menu" class="w-9 h-9 rounded-lg flex items-center justify-center text-slate-700 hover:bg-slate-100 transition-all cursor-pointer border-0 bg-transparent text-base">
