@@ -397,7 +397,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['google_jwt']) && emp
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400"><i class="fa-solid fa-lock text-sm"></i></span>
                             <input id="password" type="password" name="password" placeholder="Enter your password" required class="w-full border border-gray-200 focus:border-[#2e7d32] focus:ring-3 focus:ring-green-700/5 rounded-xl pl-10 pr-10 py-2.5 text-xs outline-hidden transition-all bg-white font-medium text-slate-800">
-                            <span class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400 cursor-pointer hover:text-gray-600"><i class="fa-regular fa-eye text-sm"></i></span>
+                            <span id="togglePassword" role="button" tabindex="0" aria-label="Show or hide password" class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400 cursor-pointer hover:text-gray-600"><i class="fa-regular fa-eye text-sm"></i></span>
                         </div>
                         <div class="w-full flex justify-end mt-1.5" id="forgotPasswordRow">
                             <a href="#" class="text-[11px] font-bold text-emerald-700 hover:text-emerald-800 tracking-wide">Forgot password?</a>
@@ -573,6 +573,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['google_jwt']) && emp
       } catch (err) {
         alert("Google Error: " + friendlyAuthError(err));
       }
+    });
+
+    // Show/hide password
+    const togglePassword = document.getElementById("togglePassword");
+    const toggleIcon = togglePassword.querySelector("i");
+    function flipPassword() {
+      const field = document.getElementById("password");
+      const show = field.type === "password";
+      field.type = show ? "text" : "password";
+      toggleIcon.classList.toggle("fa-eye", !show);
+      toggleIcon.classList.toggle("fa-eye-slash", show);
+    }
+    togglePassword.addEventListener("click", flipPassword);
+    togglePassword.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flipPassword(); }
     });
 
     // Pressing Enter in resident mode goes through the same Firebase-then-PHP path as the Log In button
