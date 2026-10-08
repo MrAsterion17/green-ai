@@ -17,6 +17,46 @@ if (!isset($_SESSION['user'])) {
     exit();
 }
 
+require_once '../includes/config.php'; // provides $pdo
+require_once '../includes/user_schema.php';
+require_once '../includes/sms.php';
+greenai_ensure_user_contact_columns($pdo);
+
+$userId = (int) ($_SESSION['user']['id'] ?? 0);
+$homeMessage = '';
+$homeError = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_home_sms'])) {
+    $residenceIn = trim($_POST['residence'] ?? '');
+    $blockIn = trim($_POST['block_no'] ?? '');
+    $lotIn = trim($_POST['lot_no'] ?? '');
+    $phoneIn = trim($_POST['phone'] ?? '');
+    $phoneNorm = $phoneIn === '' ? '' : greenai_normalize_phone($phoneIn);
+    $smsIn = isset($_POST['sms_alerts']) ? 1 : 0;
+    $fieldOk = '/^[A-Za-z0-9\- ]{1,20}$/';
+
+    if (!in_array($residenceIn, greenai_subdivisions(), true)) {
+        $homeError = 'Please choose your subdivision.';
+    } elseif (!preg_match($fieldOk, $blockIn) || !preg_match($fieldOk, $lotIn)) {
+        $homeError = 'Block and Lot are required and may only contain letters, numbers, spaces and dashes.';
+    } elseif ($phoneNorm === null) {
+        $homeError = 'Enter a valid Philippine mobile number (e.g. 0917 123 4567).';
+    } elseif ($smsIn && $phoneNorm === '') {
+        $homeError = 'Add a mobile number to receive SMS alerts, or turn the alerts off.';
+    } else {
+        $pdo->prepare("UPDATE users SET Residence = ?, block_no = ?, lot_no = ?, phone = ?, sms_alerts = ? WHERE id = ?")
+            ->execute([$residenceIn, $blockIn, $lotIn, $phoneNorm === '' ? null : $phoneNorm, $smsIn, $userId]);
+        $homeMessage = 'Home address and SMS alert settings saved.';
+    }
+}
+
+$homeStmt = $pdo->prepare("SELECT Residence, block_no, lot_no, phone, sms_alerts FROM users WHERE id = ?");
+$homeStmt->execute([$userId]);
+$home = $homeStmt->fetch() ?: [];
+if ($homeError) { // keep what the resident typed so they can fix it
+    $home = ['Residence' => $_POST['residence'] ?? '', 'block_no' => $_POST['block_no'] ?? '', 'lot_no' => $_POST['lot_no'] ?? '', 'phone' => $_POST['phone'] ?? '', 'sms_alerts' => isset($_POST['sms_alerts']) ? 1 : 0];
+}
+
 $fullname = $_SESSION['user']['fullname'] ?? 'User';
 $email = $_SESSION['user']['email'] ?? 'user@example.com';
 $initials = strtoupper(substr(preg_replace('/[^A-Za-z0-9]/', '', $fullname), 0, 2));
@@ -126,6 +166,54 @@ $battery_alert_threshold = 20; // %
                     </div>
                 </div>
             </div>
+
+            <form action="" method="POST" class="bg-white p-4 sm:p-6 rounded-3xl border border-slate-100 shadow-xs space-y-5">
+                <input type="hidden" name="save_home_sms" value="1">
+                <div class="border-b border-slate-100 pb-3">
+                    <h3 class="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-location-dot text-[#15803d] text-sm"></i> Home Address &amp; SMS Alerts
+                    </h3>
+                    <p class="text-[10px] font-semibold text-slate-400 mt-1">Your subdivision, block and lot, and the mobile number we text when rain is coming so you can harvest and save energy.</p>
+                </div>
+                <?php if ($homeMessage): ?>
+                <div class="rounded-2xl bg-emerald-50 border border-emerald-100 p-3 text-xs font-semibold text-emerald-700"><?php echo htmlspecialchars($homeMessage); ?></div>
+                <?php endif; ?>
+                <?php if ($homeError): ?>
+                <div class="rounded-2xl bg-red-50 border border-red-100 p-3 text-xs font-semibold text-red-600"><?php echo htmlspecialchars($homeError); ?></div>
+                <?php endif; ?>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider">Subdivision</label>
+                        <select name="residence" required class="w-full bg-slate-50 border border-slate-200 rounded-3xl px-4 py-3 text-sm font-semibold text-slate-800 focus:outline-none focus:border-[#15803d] focus:bg-white transition-all">
+                            <option value="">Select subdivision</option>
+                            <?php foreach (greenai_subdivisions() as $sub): ?>
+                            <option value="<?php echo htmlspecialchars($sub); ?>" <?php echo ($home['Residence'] ?? '') === $sub ? 'selected' : ''; ?>><?php echo htmlspecialchars($sub); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider">Block</label>
+                        <input type="text" name="block_no" required maxlength="20" value="<?php echo htmlspecialchars($home['block_no'] ?? ''); ?>" class="w-full bg-slate-50 border border-slate-200 rounded-3xl px-4 py-3 text-sm font-semibold text-slate-800 focus:outline-none focus:border-[#15803d] focus:bg-white transition-all" />
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider">Lot</label>
+                        <input type="text" name="lot_no" required maxlength="20" value="<?php echo htmlspecialchars($home['lot_no'] ?? ''); ?>" class="w-full bg-slate-50 border border-slate-200 rounded-3xl px-4 py-3 text-sm font-semibold text-slate-800 focus:outline-none focus:border-[#15803d] focus:bg-white transition-all" />
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider">Mobile Number</label>
+                        <input type="tel" name="phone" maxlength="20" placeholder="0917 123 4567" value="<?php echo htmlspecialchars($home['phone'] ?? ''); ?>" class="w-full bg-slate-50 border border-slate-200 rounded-3xl px-4 py-3 text-sm font-semibold text-slate-800 focus:outline-none focus:border-[#15803d] focus:bg-white transition-all" />
+                    </div>
+                </div>
+                <label class="flex items-start gap-2 text-xs font-semibold text-slate-600 cursor-pointer">
+                    <input type="checkbox" name="sms_alerts" value="1" <?php echo !empty($home['sms_alerts']) ? 'checked' : ''; ?> class="mt-0.5 accent-[#15803d]">
+                    <span>Send me an SMS when rain is forecast so I can harvest and save solar energy right away.</span>
+                </label>
+                <div class="flex justify-end">
+                    <button type="submit" class="px-6 py-3 bg-[#15803d] hover:bg-[#0f4f1b] text-white text-xs font-black rounded-2xl transition-all shadow-xs hover:shadow-md tracking-wide flex items-center gap-2">
+                        <i class="fa-regular fa-floppy-disk text-sm"></i> Save Address &amp; Alerts
+                    </button>
+                </div>
+            </form>
 
             <form action="" method="POST" class="space-y-6" id="portalSettingsForm">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">

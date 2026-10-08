@@ -35,3 +35,26 @@ The repo includes a `Dockerfile` (PHP 8.3 + Apache) and `railway.json`, so Railw
 
 If you use Google sign-in, add `https://<your-railway-domain>/login.php` as an authorized
 redirect URI in Google Cloud Console.
+
+## Rain SMS alerts
+
+Residents give their subdivision, block, lot and mobile number at sign-up (or later under
+**Settings → Home Address & SMS Alerts**). When rain is forecast within the next 3 hours
+(60%+ chance), opted-in residents get a text telling them to harvest and save solar energy.
+Each resident is texted at most once every 6 hours.
+
+Railway variables on the web service:
+
+```
+SEMAPHORE_API_KEY=<from semaphore.co>
+SEMAPHORE_SENDER_NAME=<optional approved sender name>
+CRON_SECRET=<any long random string>
+```
+
+Then have a scheduler (cron-job.org, a Railway cron service, etc.) call this URL every 15-30 minutes:
+
+```
+https://<your-domain>/api/rainalert.php?key=<CRON_SECRET>
+```
+
+Add `&dry=1` to preview who would be texted without sending. Sent/failed texts are recorded in `sms_alert_log`.
