@@ -44,10 +44,17 @@ if (!empty($auth_user)) {
     var key = 'rainAlertDismissed:<?php echo htmlspecialchars($rain_alert['time']); ?>';
     var banner = document.getElementById('rainAlertBanner');
     try { if (sessionStorage.getItem(key)) banner.style.display = 'none'; } catch (e) {}
+    var timer = null;
     window.dismissRainAlert = function () {
-        banner.style.display = 'none';
+        clearTimeout(timer);
+        banner.style.transition = 'opacity .5s, transform .5s';
+        banner.style.opacity = '0';
+        banner.style.transform = 'translateY(-8px)';
+        setTimeout(function () { banner.style.display = 'none'; }, 500);
         try { sessionStorage.setItem(key, '1'); } catch (e) {}
     };
+    // Goes away by itself after 10 seconds (and stays gone for this forecast until the session ends)
+    if (banner.style.display !== 'none') timer = setTimeout(window.dismissRainAlert, 10000);
 })();
 </script>
 <?php endif; ?>
